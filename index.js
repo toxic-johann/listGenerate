@@ -1,7 +1,7 @@
 'use strict'
 //after consideration, i desicide to use hardcode.
 
-var tableGenerate = {
+var listGenerate = {
     preifx:"toxic",
     data:{
         0:{type:'text',name:'name',show:'name:'},
@@ -40,12 +40,13 @@ var tableGenerate = {
     myEvent:{},
 
     initTemplate:function (data,content) {
-        this.data = data || this.data;
-        data = this.data;
+        let self=this;
+        self.data = data || self.data;
+        data = self.data;
         let promise = new Promise(function(resolve,reject){
-            let list = tableGenerate.generateItem(data);
+            let list = self.generateItem(data);
             $(content).html("<ul>"+list+"</ul>");
-            let _radioList = $("input[type='radio']."+tableGenerate.preifx);
+            let _radioList = $("input[type='radio']."+self.preifx);
             for (let i=_radioList.length-1;i>-1;i--){
                 $(_radioList[i]).attr("name",$(_radioList[i]).attr("name")+"-0");
             }
@@ -55,11 +56,14 @@ var tableGenerate = {
     },
 
     generateItem:function (data){
+        let self=this;
         let list = [];
         for (let item in data){
             let listItem = [
             "<list-item class='",
-            tableGenerate.preifx+" "+tableGenerate.preifx+"-item-"+item,
+            " ",
+            data.myclass,
+            self.preifx+" "+self.preifx+"-item-"+item,
             "' mark='",
             item,
             "' ",
@@ -74,41 +78,41 @@ var tableGenerate = {
                 if(Object.keys(data[item]).find((n)=>n=='more')){
                     let button=[
                     "<list-item-choice class='",
-                    tableGenerate.preifx," ",tableGenerate.preifx,"-more-",item,
+                    self.preifx," ",self.preifx,"-more-",item,
                     "''><input type='button' name='more' value = '",
                     (data[item].more.value || 'more'),
                     "'></list-item-choice>"
                     ];
 
                     listItem.splice(-1, 0, button.join(""));
-                    button = "."+tableGenerate.preifx+"-more-"+item
-                    tableGenerate.myEvent[button]={
+                    button = "."+self.preifx+"-more-"+item
+                    self.myEvent[button]={
                         event:'more',
                         num:data[item].more.num,
-                        target:"."+tableGenerate.preifx+"-item-"+item
+                        target:"."+self.preifx+"-item-"+item
                     }
                 }
                 if(Object.keys(data[item]).find((n)=>n=='delete')){
                     let button=[
                     "<list-item-choice class='",
-                    tableGenerate.preifx," ",tableGenerate.preifx,"-delete-",item,
+                    self.preifx," ",self.preifx,"-delete-",item,
                     "''><input type='button' name='delete' value = '",
                     (data[item].delete.value || 'delete'),
                     "'></list-item-choice>"
                     ];
 
                     listItem.splice(-1, 0, button.join(""));
-                    button = "."+tableGenerate.preifx+"-delete-"+item
-                    tableGenerate.myEvent[button]={
+                    button = "."+self.preifx+"-delete-"+item
+                    self.myEvent[button]={
                         event:'delete',
                         num:data[item].more.num,
-                        target:"."+tableGenerate.preifx+"-item-"+item
+                        target:"."+self.preifx+"-item-"+item
                     }
                 }
-                listItem[listItem.findIndex((n)=>n==="myself")] = tableGenerate.generateSelfAttr(data[item]);
-                listItem[listItem.findIndex((n)=>n==="element")] = tableGenerate.generateSubItem(data[item]);
+                listItem[listItem.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data[item]);
+                listItem[listItem.findIndex((n)=>n==="element")] = self.generateSubItem(data[item]);
             } else if(typeof data[item] === 'object' && !isNaN(item)){
-                listItem[listItem.findIndex((n)=>n==="element")] = tableGenerate.generateElement(data[item]);
+                listItem[listItem.findIndex((n)=>n==="element")] = self.generateElement(data[item]);
             }
             
            if(!isNaN(item)){
@@ -119,11 +123,14 @@ var tableGenerate = {
     },
 
     generateSubItem:function (data){
+        let self=this;
         let list = [];
         for (let item in data){
             let listItem = [
             "<list-sub-item class='",
-            tableGenerate.preifx,
+            self.preifx,
+            " ",
+            data.myclass,
             "' ",
             "myself",
             ">",
@@ -132,12 +139,12 @@ var tableGenerate = {
             if(Object.keys(data[item]).find((n)=>!isNaN(n)) 
                 && Object.keys(data[item]).length>1
                 && !isNaN(item)){
-                listItem[listItem.findIndex((n)=>n==="element")]  = tableGenerate.generateSubItem(data[item]);
+                listItem[listItem.findIndex((n)=>n==="element")]  = self.generateSubItem(data[item]);
             } else if(typeof data[item] === 'object' && !isNaN(item)){
-                listItem[listItem.findIndex((n)=>n==="element")]  = tableGenerate.generateElement(data[item]);
+                listItem[listItem.findIndex((n)=>n==="element")]  = self.generateElement(data[item]);
             }
 
-            listItem[listItem.findIndex((n)=>n==="myself")] = tableGenerate.generateSelfAttr(data[item]);
+            listItem[listItem.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data[item]);
             if(!isNaN(item)){
                 list.push(listItem.join(""));
             }
@@ -146,23 +153,41 @@ var tableGenerate = {
     },
 
     generateElement:function (data){
+        let self=this;
         if(data.type == 'selection'){
-            return tableGenerate.generateSelect(data);
+            return self.generateSelect(data);
         } else{
-            return tableGenerate.generateInput(data);
+            return self.generateInput(data);
         }
     },
 
     generateInput:function (data){
+        let self=this;
         let temp = [
-        "<list-element><list-element-head>",
+        "<list-element><list-element-head class='",
+        self.preifx,
+        " ",
+        data.type,
+        "-",
+        data.name,
+        "-",
+        data.value,
+        ,"'>",
         data.show,
         "</list-element-head><input type='",
         data.type,
         "' name='",
         data.name,
         "' class='",
-        tableGenerate.preifx,
+        self.preifx,
+        " ",
+        data.type,
+        "-",
+        data.name,
+        "-",
+        data.value,
+        " ",
+        data.myclass,
         data.checked?"' checked='"+data.checked:"",
         data.disabled?"' disabled='"+data.disabled:"",
         "' value='",
@@ -172,11 +197,20 @@ var tableGenerate = {
         "></list-element>"
         ];
 
-        temp[temp.findIndex((n)=>n==="myself")] = tableGenerate.generateSelfAttr(data);
+
+        temp[temp.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data);
+        if((data.bindLabel || (data.whole?data.whole.bindLabel:true)) && 
+            (data.type === 'checkbox' || data.type === 'radio')){
+            self.myEvent[["list-element-head.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")]={
+                event:'bindLabel',
+                target:["input.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")
+            }
+        }
         return temp.join("");
     },
 
     generateSelect:function (data){
+        let self=this;
         let temp = [
         "<list-element><list-element-head>",
         data.show,
@@ -185,19 +219,20 @@ var tableGenerate = {
         "' name='",
         data.name,
         "' class='",
-        tableGenerate.preifx,
+        self.preifx,
         "' ",
         "myself",
         ,">",
         "option",
         "</select></list-element>"
         ];
-        temp[temp.findIndex((n)=>n==="option")] = tableGenerate.generateOption(data.option);
-        temp[temp.findIndex((n)=>n==="myself")] = tableGenerate.generateSelfAttr(data);
+        temp[temp.findIndex((n)=>n==="option")] = self.generateOption(data.option);
+        temp[temp.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data);
         return temp.join("");
     },
 
     generateOption:function (data){
+        let self=this;
         if(!data){
             return "";
         }
@@ -213,6 +248,7 @@ var tableGenerate = {
     },
 
     generateSelfAttr:function(data){
+        let self=this;
         if(!data.myself){
             return "";
         }
@@ -223,27 +259,34 @@ var tableGenerate = {
             myself.push(data.myself[each]);
             myself.push("' ");
         }
+        console.log(myself);
         return myself.join("");
     },
 
     bindEvent:function (eventList){
+        let self=this;
         let promise = new Promise(function(resolve,reject){
             for (let each in eventList){
                 if(eventList[each].event === 'more'){
                     let _target = eventList[each].target.split("-");
                     _target = _target.splice(_target.length-1,1)[0];
                     let temp={};
-                    temp[_target] = tableGenerate.data[_target];
-                    let _code = tableGenerate.generateItem(temp);
+                    temp[_target] = self.data[_target];
+                    let _code = self.generateItem(temp);
                     $($(each)[0]).on('click',function(evt){
-                        tableGenerate.addItem($(evt.currentTarget).parent(),_code,each);
+                        self.addItem($(evt.currentTarget).parent(),_code,each);
+                    });
+                }else if(eventList[each].event === 'delete'){
+                    $($(each)[0]).on('click',function(evt){
+                        console.log('i am click');
+                        self.deleteItem($(evt.currentTarget).parent());
+                    });
+                } else if(eventList[each].event === 'bindLabel'){
+                    $($(each)[0]).on('click',function(evt){
+                        $($(eventList[each].target)[0]).click();
                     });
                 }
-                if(eventList[each].event === 'delete'){
-                    $($(each)[0]).on('click',function(evt){
-                        tableGenerate.deleteItem($(evt.currentTarget).parent());
-                    });
-                }
+
             }
             resolve('success');
         });
@@ -251,6 +294,7 @@ var tableGenerate = {
     },
 
     addItem:function (_target,_code,_source){
+        let self=this;
         _target.after(_code);
         let _sameItem = $(_target).parent().find("[mark='"+$(_target).attr("mark")+"']");
         let _sameItemCount = 0;
@@ -267,12 +311,12 @@ var tableGenerate = {
             }
         }
         _target.next().find(_source).on('click',function(evt){
-            tableGenerate.addItem($(evt.currentTarget).parent(),_code,_source);
+            self.addItem($(evt.currentTarget).parent(),_code,_source);
         });
         if(_target.next().find("[name='delete']")){
             _target.next().find("[name='delete']")
             .on('click',function(evt){
-                tableGenerate.deleteItem($(evt.currentTarget).parent().parent());
+                self.deleteItem($(evt.currentTarget).parent().parent());
             });
         }
     },
@@ -282,13 +326,14 @@ var tableGenerate = {
     },
 
     collectData:function (preifx){
-        let list = $("list-item."+tableGenerate.preifx);
+        let self=this;
+        let list = $("list-item."+self.preifx);
         let collect={};
         for (let i=list.length-1;i>-1;i--){
             let subCollect = collect[$(list[i]).attr("mark")+"-"+$(list[i]).attr("count")]=[];
             if($(list[i]).find('list-sub-item').length<=0){
                 let element = $(list[i]).find('list-element')[0];
-                let data = tableGenerate.collectDataFromElement(element);
+                let data = self.collectDataFromElement(element);
                 if(typeof data != "undefined"){
                     subCollect.push(data);
                 }
@@ -296,7 +341,7 @@ var tableGenerate = {
                 let subList = $(list[i]).find('list-sub-item');
                 for (let j=subList.length;j>-1;j--){
                     let element = $(subList[j]).find('list-element')[0];
-                    let data = tableGenerate.collectDataFromElement(element);
+                    let data = self.collectDataFromElement(element);
                     if(typeof data != "undefined"){
                         subCollect.push(data);
                     }
@@ -307,6 +352,7 @@ var tableGenerate = {
     },
 
     collectDataFromElement:function (_target){
+        let self=this;
         if($(_target).find('input').length>0){
             let _input = $(_target).find('input')[0];
             if($(_input).attr('type') === 'radio'){
@@ -340,5 +386,19 @@ var tableGenerate = {
             temp[$(_select).attr('name')] = $(_select).val();
             return temp;
         }
+    },
+
+    init:function(data,componet){
+        let self=this;
+        self.data = data || self.data;
+        data = self.data;
+        let promise = new Promise(function(resolve,reject){
+            self.initTemplate(data,componet).
+            then(self.bindEvent(self.myEvent))
+            .then(function(){
+                resolve('success');
+            });
+        });
+        return promise;
     }
 }
