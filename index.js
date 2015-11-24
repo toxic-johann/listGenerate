@@ -209,9 +209,11 @@ var listGenerate = {
                 target:["input.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")
             };
         }
+
         if((data.selfStyle || (data.whole?data.whole.selfStyle:false)) &&
             (data.type === 'checkbox' || data.type === 'radio' || data.type === 'button')){
-
+        } else {
+            temp[temp.findIndex((n)=>n==="selfLabel")] = "";
         }
         return temp.join("");
     },
