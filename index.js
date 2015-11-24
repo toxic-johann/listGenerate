@@ -85,12 +85,12 @@ var listGenerate = {
                     ];
 
                     listItem.splice(-1, 0, button.join(""));
-                    button = "."+self.preifx+"-more-"+item
-                    self.myEvent[button]={
-                        event:'more',
+                    button = "."+self.preifx+"-more-"+item;
+                    self.myEvent[button] = self.myEvent[button] ||{};
+                    self.myEvent[button].more={
                         num:data[item].more.num,
                         target:"."+self.preifx+"-item-"+item
-                    }
+                    };
                 }
                 if(Object.keys(data[item]).find((n)=>n=='delete')){
                     let button=[
@@ -102,12 +102,12 @@ var listGenerate = {
                     ];
 
                     listItem.splice(-1, 0, button.join(""));
-                    button = "."+self.preifx+"-delete-"+item
-                    self.myEvent[button]={
-                        event:'delete',
+                    button = "."+self.preifx+"-delete-"+item;
+                    self.myEvent[button] = self.myEvent[button] ||{};
+                    self.myEvent[button].delete={
                         num:data[item].more.num,
                         target:"."+self.preifx+"-item-"+item
-                    }
+                    };
                 }
                 listItem[listItem.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data[item]);
                 listItem[listItem.findIndex((n)=>n==="element")] = self.generateSubItem(data[item]);
@@ -174,7 +174,9 @@ var listGenerate = {
         data.value,
         ,"'>",
         data.show,
-        "</list-element-head><input type='",
+        "</list-element-head>",
+        "selfLabel",
+        "<input type='",
         data.type,
         "' name='",
         data.name,
@@ -199,12 +201,17 @@ var listGenerate = {
 
 
         temp[temp.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data);
-        if((data.bindLabel || (data.whole?data.whole.bindLabel:true)) && 
+        if((data.bindLabel || (data.whole?data.whole.bindLabel:false)) && 
             (data.type === 'checkbox' || data.type === 'radio')){
-            self.myEvent[["list-element-head.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")]={
-                event:'bindLabel',
+            let button = ["list-element-head.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("");
+            self.myEvent[button] = self.myEvent[button] ||{};
+            self.myEvent[button].bindLabel = {
                 target:["input.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")
-            }
+            };
+        }
+        if((data.selfStyle || (data.whole?data.whole.selfStyle:false)) &&
+            (data.type === 'checkbox' || data.type === 'radio' || data.type === 'button')){
+
         }
         return temp.join("");
     },
@@ -259,34 +266,33 @@ var listGenerate = {
             myself.push(data.myself[each]);
             myself.push("' ");
         }
-        console.log(myself);
         return myself.join("");
     },
 
     bindEvent:function (eventList){
         let self=this;
         let promise = new Promise(function(resolve,reject){
-            for (let each in eventList){
-                if(eventList[each].event === 'more'){
-                    let _target = eventList[each].target.split("-");
-                    _target = _target.splice(_target.length-1,1)[0];
-                    let temp={};
-                    temp[_target] = self.data[_target];
-                    let _code = self.generateItem(temp);
-                    $($(each)[0]).on('click',function(evt){
-                        self.addItem($(evt.currentTarget).parent(),_code,each);
-                    });
-                }else if(eventList[each].event === 'delete'){
-                    $($(each)[0]).on('click',function(evt){
-                        console.log('i am click');
-                        self.deleteItem($(evt.currentTarget).parent());
-                    });
-                } else if(eventList[each].event === 'bindLabel'){
-                    $($(each)[0]).on('click',function(evt){
-                        $($(eventList[each].target)[0]).click();
-                    });
+            for (let every in eventList){
+                for(let each in eventList[every]){
+                    if(each === 'more'){
+                        let _target = eventList[every][each].target.split("-");
+                        _target = _target.splice(_target.length-1,1)[0];
+                        let temp={};
+                        temp[_target] = self.data[_target];
+                        let _code = self.generateItem(temp);
+                        $($(every)[0]).on('click',function(evt){
+                            self.addItem($(evt.currentTarget).parent(),_code,every);
+                        });
+                    }else if(each === 'delete'){
+                        $($(every)[0]).on('click',function(evt){
+                            self.deleteItem($(evt.currentTarget).parent());
+                        });
+                    } else if(each === 'bindLabel'){
+                        $($(every)[0]).on('click',function(evt){
+                            $($(eventList[every][each].target)[0]).click();
+                        });
+                    }
                 }
-
             }
             resolve('success');
         });
@@ -393,12 +399,25 @@ var listGenerate = {
         self.data = data || self.data;
         data = self.data;
         let promise = new Promise(function(resolve,reject){
-            self.initTemplate(data,componet).
-            then(self.bindEvent(self.myEvent))
+            self.registerComponent()
+            .then(self.initTemplate(data,componet))
+            .then(self.bindEvent(self.myEvent))
             .then(function(){
                 resolve('success');
             });
         });
         return promise;
+    },
+
+    registerComponent:function(){
+        let promise = new Promise(function(resolve,reject){
+            document.registerElement('list-item');
+            document.registerElement('list-sub-item');
+            document.registerElement('list-element');
+            document.registerElement('list-element-head');
+            resolve('success');
+        });
+        return promise;
+       
     }
 }
