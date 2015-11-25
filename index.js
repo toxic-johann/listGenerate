@@ -308,7 +308,7 @@ var listGenerate = {
                         });
                     } else if(each === 'bindLabel'){
                         $(componet).delegate(every,'click',function(evt){
-                            $($(eventList[every][each].target)[0]).click();
+                            $($($(evt.currentTarget).parent()).find(eventList[every][each].target)[0]).click();
                         });
                     }
                 }
@@ -425,6 +425,7 @@ var listGenerate = {
             document.registerElement('list-sub-item');
             document.registerElement('list-element');
             document.registerElement('list-element-head');
+            document.registerElement('label');
             resolve('success');
         });
         return promise;
