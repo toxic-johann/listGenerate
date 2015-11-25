@@ -201,18 +201,30 @@ var listGenerate = {
 
 
         temp[temp.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data);
-        if((data.bindLabel || (data.whole?data.whole.bindLabel:false)) && 
+        if((data.bindLabel || (self.data.whole?self.data.whole.bindLabel:false)) && 
             (data.type === 'checkbox' || data.type === 'radio')){
+            console.log('bindLAbel')
             let button = ["list-element-head.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("");
             self.myEvent[button] = self.myEvent[button] ||{};
             self.myEvent[button].bindLabel = {
                 target:["input.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")
             };
         }
-
-        if((data.selfStyle || (data.whole?data.whole.selfStyle:false)) &&
+        if((data.selfStyle || (self.data.whole?self.data.whole.selfStyle:false)) &&
             (data.type === 'checkbox' || data.type === 'radio' || data.type === 'button')){
-        } else {
+            let selfLabel = [
+        "<label class='",
+        self.preifx,
+        " ",
+        data.type,
+        "-",
+        data.name,
+        "-",
+        data.value,
+        "'></label>"
+        ];
+            temp[temp.findIndex((n)=>n==="selfLabel")] = selfLabel;
+        }else {
             temp[temp.findIndex((n)=>n==="selfLabel")] = "";
         }
         return temp.join("");
