@@ -50,6 +50,10 @@ var listGenerate = {
             for (let i=_radioList.length-1;i>-1;i--){
                 $(_radioList[i]).attr("name",$(_radioList[i]).attr("name")+"-0");
             }
+            _radioList = $("label.radio."+self.preifx);
+            for (let i=_radioList.length-1;i>-1;i--){
+                $(_radioList[i]).attr("name","0");
+            }
             resolve('success');
         });
         return promise;
@@ -218,17 +222,26 @@ var listGenerate = {
         self.preifx,
         " ",
         data.type,
+        " ",
+        data.type,
         "-",
         data.name,
         " ",
         data.type,
         "-",
         data.name,
-        "-",
+        "-",    
         data.value,
         "'></label>"
         ].join("");
             temp[temp.findIndex((n)=>n==="selfLabel")] = selfLabel;
+            let button = ["label.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("");
+            self.myEvent[button] = self.myEvent[button] ||{};
+            self.myEvent[button].selfLabel = {
+                type:data.type,
+                set:'label.'+self.preifx+"."+data.type+"-"+data.name,
+                bind:["input.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("")
+            }
         }else {
             temp[temp.findIndex((n)=>n==="selfLabel")] = "";
         }
@@ -310,6 +323,20 @@ var listGenerate = {
                         $(componet).delegate(every,'click',function(evt){
                             $($($(evt.currentTarget).parent()).find(eventList[every][each].target)[0]).click();
                         });
+                    } else if(each === 'selfLabel'){
+                        if(eventList[every][each].type === 'checkbox'){
+                            $(componet).delegate(every,'click',function(evt){
+                                $(evt.currentTarget).toggleClass("checked");
+                                $($($(evt.currentTarget).parent()).find(eventList[every][each].bind)[0]).click();
+                            });
+                        }else if(eventList[every][each].type === 'radio'){
+                            $(componet).delegate(every,'click',function(evt){
+                                let set = $(eventList[every][each].set+"[name="+$(evt.currentTarget).attr("name")+"]");
+                                $(set).removeClass("checked");
+                                $(evt.currentTarget).addClass("checked");
+                                $($($(evt.currentTarget).parent()).find(eventList[every][each].bind)[0]).click();
+                            });
+                        }
                     }
                 }
             }
@@ -333,6 +360,12 @@ var listGenerate = {
             let _radioList = _target.next().find("input[type='radio']");
             for (let i=_radioList.length-1;i>-1;i--){
                 $(_radioList[i]).attr("name",$(_radioList[i]).attr("name")+'-'+$(_target).next().attr("count"));
+            }
+        }
+        if(_target.next().find("label.radio").length>0){
+            let _radioList = _target.next().find("label.radio");
+            for (let i=_radioList.length-1;i>-1;i--){
+                $(_radioList[i]).attr("name",$(_target).next().attr("count"));
             }
         }
     },
@@ -425,7 +458,6 @@ var listGenerate = {
             document.registerElement('list-sub-item');
             document.registerElement('list-element');
             document.registerElement('list-element-head');
-            document.registerElement('label');
             resolve('success');
         });
         return promise;
