@@ -189,6 +189,8 @@ var listGenerate = {
         "-",
         data.value,
         " ",
+        ((data.selfStyle || (self.data.whole?self.data.whole.selfStyle:false)) &&
+        (data.type === 'checkbox' || data.type === 'radio' || data.type === 'button'))?"hide ":"",
         data.myclass,
         data.checked?"' checked='"+data.checked:"",
         data.disabled?"' disabled='"+data.disabled:"",
@@ -203,7 +205,6 @@ var listGenerate = {
         temp[temp.findIndex((n)=>n==="myself")] = self.generateSelfAttr(data);
         if((data.bindLabel || (self.data.whole?self.data.whole.bindLabel:false)) && 
             (data.type === 'checkbox' || data.type === 'radio')){
-            console.log('bindLAbel')
             let button = ["list-element-head.",self.preifx,".",data.type,"-",data.name,"-",data.value].join("");
             self.myEvent[button] = self.myEvent[button] ||{};
             self.myEvent[button].bindLabel = {
@@ -219,10 +220,14 @@ var listGenerate = {
         data.type,
         "-",
         data.name,
+        " ",
+        data.type,
+        "-",
+        data.name,
         "-",
         data.value,
         "'></label>"
-        ];
+        ].join("");
             temp[temp.findIndex((n)=>n==="selfLabel")] = selfLabel;
         }else {
             temp[temp.findIndex((n)=>n==="selfLabel")] = "";
@@ -283,7 +288,7 @@ var listGenerate = {
         return myself.join("");
     },
 
-    bindEvent:function (eventList){
+    bindEvent:function (eventList,componet){
         let self=this;
         let promise = new Promise(function(resolve,reject){
             for (let every in eventList){
@@ -294,15 +299,15 @@ var listGenerate = {
                         let temp={};
                         temp[_target] = self.data[_target];
                         let _code = self.generateItem(temp);
-                        $($(every)[0]).on('click',function(evt){
+                        $(componet).delegate(every,'click',function(evt){
                             self.addItem($(evt.currentTarget).parent(),_code,every);
                         });
                     }else if(each === 'delete'){
-                        $($(every)[0]).on('click',function(evt){
+                        $(componet).delegate(every,'click',function(evt){
                             self.deleteItem($(evt.currentTarget).parent());
                         });
                     } else if(each === 'bindLabel'){
-                        $($(every)[0]).on('click',function(evt){
+                        $(componet).delegate(every,'click',function(evt){
                             $($(eventList[every][each].target)[0]).click();
                         });
                     }
@@ -329,15 +334,6 @@ var listGenerate = {
             for (let i=_radioList.length-1;i>-1;i--){
                 $(_radioList[i]).attr("name",$(_radioList[i]).attr("name")+'-'+$(_target).next().attr("count"));
             }
-        }
-        _target.next().find(_source).on('click',function(evt){
-            self.addItem($(evt.currentTarget).parent(),_code,_source);
-        });
-        if(_target.next().find("[name='delete']")){
-            _target.next().find("[name='delete']")
-            .on('click',function(evt){
-                self.deleteItem($(evt.currentTarget).parent().parent());
-            });
         }
     },
 
@@ -415,7 +411,7 @@ var listGenerate = {
         let promise = new Promise(function(resolve,reject){
             self.registerComponent()
             .then(self.initTemplate(data,componet))
-            .then(self.bindEvent(self.myEvent))
+            .then(self.bindEvent(self.myEvent,componet))
             .then(function(){
                 resolve('success');
             });
