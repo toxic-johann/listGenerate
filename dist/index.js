@@ -25,8 +25,8 @@ var toxicInput = {
                 show: "show sth"
             }]
         }, {
-            type: 'selection',
-            name: 'select',
+            name: 'selection',
+            type: 'select',
             show: 'select!!',
             option: [{ value: 'fuck', show: 'hello' }, { value: 'shit', show: 'goodluck' }],
             events: []
@@ -78,7 +78,7 @@ var toxicInput = {
         }.apply(toxicInput, arguments);
     },
     generatePrefix: function generatePrefix() {
-        return "<toxic-item>";
+        return '<toxic-item>';
     },
     generateSuffix: function generateSuffix() {
         return "</toxic-item>";
@@ -121,14 +121,14 @@ var toxicInput = {
     generateToxicElement: function generateToxicElement() {
         return function (data) {
             var content = undefined;
-            if (data.type == 'selection') {
+            if (data.type == 'select') {
                 content = this.generateSelect(data);
             } else if (data.type == 'show') {
                 content = this.generateShow(data.show);
             } else {
                 content = this.generateInput(data);
             }
-            return this.generateElement('toxic-' + data.type, {}, content, data.events);
+            return this.generateElement('toxic-element', { type: data.type }, content, data.events);
         }.apply(toxicInput, arguments);
     },
     generateInput: function generateInput() {
@@ -236,11 +236,25 @@ var toxicInput = {
         $(clone).find("input:radio").attr("name", $(clone).find("input:radio").attr("name") + "-" + tmp);
 
         //remove value
-        $(clone).find("input").val("");
+        $(clone).find("input:not([type=radio]):not([type=checkbox])").val("");
 
         //remove checked
         $(clone).find("input:checked").attr("checked", false);
         return clone;
+    },
+    getData: function getData(selector) {
+        var elements = $("toxic-element");
+        elements.each(function (index, element) {
+            if ($(element).attr("type") == 'radio' || $(element).attr("type") == 'checkbox') {
+                console.log($(element).find("input:checked").val());
+            } else if ($(element).attr("type") == 'select') {
+                console.log($(element).find("select").val());
+            } else if ($(element).attr("type") == 'show') {
+                //do nothing
+            } else {
+                    console.log($(element).find("input").val());
+                }
+        });
     }
 };
 
