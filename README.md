@@ -18,7 +18,7 @@
 
 用这个东西我们只需要一个data和你想要展示的地方输入。
 
-`
+```
 data:{
         children:[
             {
@@ -87,7 +87,7 @@ data:{
             {type:'delete'}
         ]
     }
-`
+```
 
 children表示内含子对象，然后你可以加各种的input元素和select
 
