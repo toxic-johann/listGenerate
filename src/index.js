@@ -285,3 +285,5 @@ let toxicInput = {
 }
 
 toxicInput.start("test",toxicInput.data)
+
+console.log("test")
