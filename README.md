@@ -1,71 +1,102 @@
-##why i write this?
+## 这个东西有什么卵用
 
-i am so lazy so that i think to write about list on the html is not convenient.I want to wirte only json.In this way, i can change it easily.Also, i can generate a json and call the list by the function.
+主要因为我这个人比较懒，所以我很多时候甚至懒得一些html或者事件都不想写。
 
-##how to use this?
+然而我们发现，人们一般需要参数的时候，会写一个可视化的页面来传入参数，而且这个参数的数目大部分的时候还是可变的。
 
-it's easy to call this.you only pass the data in the initTemplay function.
+一般这种情况下，我们需要一个表格，并且表格里应该有增加或者删除的功能。
 
-we use the number to set the list order.you should input type,name for input.
+所以我就想，我不想写html和js效率这么低下了，基于一般这种参数都是用于后台的，我们就随便用一下浏览器的表格就好了。
 
-you can use show attr to generate info for your component.
+然后，我还想，我们可不可以用json这种数据结构去表示这种需求，因为往后台大部分的情况下，我们需要的只是简单地json数据，我们可以依照json数据设置这个表格。
 
-you can insert more button and delete buttom by using more and delete attr. 
+所以我就弄出了这么个东西。
 
-you should use the collectData function to get the data if you want.
+##这个东西怎么用
 
-you can use myself attr to set your own attr
+这个是第二个版本了，之前的由于写的方式有问题，所以在循环上不太可行。
 
-you can set the prefix to set a prefix class for the table.
+用这个东西我们只需要一个data和你想要展示的地方输入。
 
-you can use css to change the style if you want.
-
-you can set many input in one item. I will generate subitem for that.
-
-```
+`
 data:{
-        0:{type:'text',name:'name',show:'name:'},
-        1:{
-            0:{type:'text',name:'source',show:'source:'},
-            1:{type:'text',name:'target',show:'target:'},
-            more:{value:'more'},
-            delete:{value:'delete'},
-            myself:{test:'i am a test'}
-        },
-        2:{
-            0:{type:'radio',name:'type',show:'oh',value:'oj'},
-            1:{type:'radio',name:'type',show:'no',value:'eie'},
-            2:{type:'radio',name:'type',show:'OMG',value:'efw'},
-            show:"oh-come-on",
-            more:true,
-            delete:{value:'kick me out'}
-        },
-        3:{
-            0:{type:'selection',name:'select',show:'select!!',option:{
-                0:{value:'fuck',show:'hello'},
-                1:{value:'shit',show:'goodluck'}
-                }
+        children:[
+            {
+                type:'text',
+                name:'name',
+                show:"name",
+                events:[
+                    {   
+                        type:'more',
+                        num:3,
+                        show:"show sth"
+                    },
+                    {type:'delete'}
+                ]
             },
-            more:true
-        },
-        4:{
-            0:{type:'checkbox',name:"text",value:"ok"},
-            1:{type:'checkbox',name:"text",value:"ok1"},
-            2:{type:'checkbox',name:"text",value:"ok2"},
-            3:{type:'checkbox',name:"text",value:"ok3"},
-            4:{type:'checkbox',name:"text",value:"ok4"},
-            more:true
-        }
+            {
+                children:[
+                    {type:'text',name:'source',show:'source:'},
+                    {type:'text',name:'target',show:'target:'},
+                    {
+                        children:[
+                            {type:'text',name:'source',show:'source:'},
+                            {type:'text',name:'target',show:'target:'},
+                        ],
+                    }
+                ],
+                events:[
+                    {   
+                        type:'more',
+                        num:3,
+                        show:"show sth"
+                    }
+                ]
+            },
+            {
+                type:'selection',
+                name:'select',
+                show:'select!!',
+                option:[
+                    {value:'fuck',show:'hello'},
+                    {value:'shit',show:'goodluck'}
+                ],
+                events:[]
+            },
+            {
+                children:[
+                    {type:'show',show:"test"},
+                    {type:'checkbox',name:"text",value:"ok"},
+                    {type:'checkbox',name:"text",value:"ok1"},
+                    {type:'checkbox',name:"text",value:"ok2"},
+                    {type:'checkbox',name:"text",value:"ok3"},
+                    {type:'checkbox',name:"text",value:"ok4"}
+                ],
+                events:[],
+            },
+            {
+                children:[
+                    {type:"show",show:"here is an radio"},
+                    {type:"radio",name:"sex",value:"male"},
+                    {type:"radio",name:"sex",value:"female"},
+                ]
+            }
+        ],
+        events:[
+            {type:'more'},
+            {type:'delete'}
+        ]
     }
-```
+`
 
-for example,you can generate data like that.
+children表示内含子对象，然后你可以加各种的input元素和select
 
-##what should i do more
+events用于表示需要绑定的事件，这个版本暂时只支持增加和删除两种功能。more用于增加，如果有num可以设置数目限制
 
-1. i decide to add the limit option on more.
-2. it's not easy to add your own function if you are no good at css.
-3. it's depents on webcomponent,which it's no support by most explorer.i may try polyfill later.
-4. if you use this and find any problem.Please info me.
-5. if you have any good idea.Please tell me.
-6. Thanks for your reading.
+show表示用于展示的信息。
+
+###待完善方面
+
+由于是抽空的重写，还是有很多可以改进的。
+
+如果你有关注的话，你会记得我前一版本有些自定义的地方，我迟点再弄哈哈哈。
